@@ -1,0 +1,182 @@
+-- Fling Toggle Script + Hotkey R + Settings GUI (T)
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+-- Fling settings (only upward force)
+local verticalForceMin = 80
+local verticalForceMax = 200
+
+-- Toggle variable
+local flingEnabled = false
+
+-- Function to fling upward only
+local function flingCharacter()
+    if not flingEnabled then return end
+    
+    local upwardForce = math.random(verticalForceMin, verticalForceMax)
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = Vector3.new(0, upwardForce, 0)
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bv.Parent = hrp
+
+    game.Debris:AddItem(bv, 0.3)
+end
+
+-- Detect touching other players
+hrp.Touched:Connect(function(hit)
+    local hitPlayer = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if hitPlayer and hitPlayer ~= player then
+        flingCharacter()
+    end
+end)
+
+-- Services
+local UserInputService = game:GetService("UserInputService")
+
+-- Main GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FlingToggleGUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Toggle Button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 160, 0, 50)
+toggleButton.Position = UDim2.new(0, 20, 0, 20)
+toggleButton.Text = "UpFling: OFF\n(R: Toggle | T: Settings)"
+toggleButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
+toggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextScaled = true
+toggleButton.Parent = screenGui
+
+-- SETTINGS GUI (T Key)
+local settingsGui = Instance.new("ScreenGui")
+settingsGui.Name = "FlingSettings"
+settingsGui.Parent = player:WaitForChild("PlayerGui")
+settingsGui.Enabled = false  -- Hidden by default
+
+-- Settings Frame
+local settingsFrame = Instance.new("Frame")
+settingsFrame.Size = UDim2.new(0, 300, 0, 200)
+settingsFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+settingsFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+settingsFrame.BorderSizePixel = 0
+settingsFrame.Parent = settingsGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = settingsFrame
+
+-- Min Force Label + Slider
+local minLabel = Instance.new("TextLabel")
+minLabel.Size = UDim2.new(1, 0, 0, 30)
+minLabel.Position = UDim2.new(0, 0, 0, 10)
+minLabel.Text = "Min Force: " .. verticalForceMin
+minLabel.BackgroundTransparency = 1
+minLabel.TextColor3 = Color3.fromRGB(255,255,255)
+minLabel.Font = Enum.Font.SourceSansBold
+minLabel.TextScaled = true
+minLabel.Parent = settingsFrame
+
+local minSlider = Instance.new("TextBox")
+minSlider.Size = UDim2.new(1, -20, 0, 30)
+minSlider.Position = UDim2.new(0, 10, 0, 40)
+minSlider.Text = tostring(verticalForceMin)
+minSlider.BackgroundColor3 = Color3.fromRGB(60,60,60)
+minSlider.TextColor3 = Color3.fromRGB(255,255,255)
+minSlider.Font = Enum.Font.SourceSans
+minSlider.TextScaled = true
+minSlider.Parent = settingsFrame
+
+-- Max Force Label + Slider
+local maxLabel = Instance.new("TextLabel")
+maxLabel.Size = UDim2.new(1, 0, 0, 30)
+maxLabel.Position = UDim2.new(0, 0, 0, 80)
+maxLabel.Text = "Max Force: " .. verticalForceMax
+maxLabel.BackgroundTransparency = 1
+maxLabel.TextColor3 = Color3.fromRGB(255,255,255)
+maxLabel.Font = Enum.Font.SourceSansBold
+maxLabel.TextScaled = true
+maxLabel.Parent = settingsFrame
+
+local maxSlider = Instance.new("TextBox")
+maxSlider.Size = UDim2.new(1, -20, 0, 30)
+maxSlider.Position = UDim2.new(0, 10, 0, 110)
+maxSlider.Text = tostring(verticalForceMax)
+maxSlider.BackgroundColor3 = Color3.fromRGB(60,60,60)
+maxSlider.TextColor3 = Color3.fromRGB(255,255,255)
+maxSlider.Font = Enum.Font.SourceSans
+maxSlider.TextScaled = true
+maxSlider.Parent = settingsFrame
+
+-- Close Button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 100, 0, 40)
+closeButton.Position = UDim2.new(0.5, -50, 1, -50)
+closeButton.Text = "CLOSE"
+closeButton.BackgroundColor3 = Color3.fromRGB(0,150,0)
+closeButton.TextColor3 = Color3.fromRGB(255,255,255)
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextScaled = true
+closeButton.Parent = settingsFrame
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 8)
+closeCorner.Parent = closeButton
+
+-- Update labels when values change
+local function updateLabels()
+    minLabel.Text = "Min Force: " .. verticalForceMin
+    maxLabel.Text = "Max Force: " .. verticalForceMax
+end
+
+-- Min force input
+minSlider.FocusLost:Connect(function()
+    local num = tonumber(minSlider.Text)
+    if num and num >= 0 and num <= 1000 then
+        verticalForceMin = num
+        updateLabels()
+    else
+        minSlider.Text = tostring(verticalForceMin)
+    end
+end)
+
+-- Max force input
+maxSlider.FocusLost:Connect(function()
+    local num = tonumber(maxSlider.Text)
+    if num and num >= 0 and num <= 1000 then
+        verticalForceMax = num
+        updateLabels()
+    else
+        maxSlider.Text = tostring(verticalForceMax)
+    end
+end)
+
+-- Toggle function
+local function toggleFling()
+    flingEnabled = not flingEnabled
+    if flingEnabled then
+        toggleButton.Text = "UpFling: ON\n(R: Toggle | T: Settings)"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(0,255,0)
+    else
+        toggleButton.Text = "UpFling: OFF\n(R: Toggle | T: Settings)"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
+    end
+end
+
+-- Event connections
+toggleButton.MouseButton1Click:Connect(toggleFling)
+closeButton.MouseButton1Click:Connect(function() settingsGui.Enabled = false end)
+
+-- Hotkeys
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.R then
+        toggleFling()
+    elseif input.KeyCode == Enum.KeyCode.T then
+        settingsGui.Enabled = not settingsGui.Enabled  -- Toggle settings GUI
+    end
+end)
