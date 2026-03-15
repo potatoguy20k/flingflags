@@ -1,0 +1,281 @@
+-- Fling Script with PC/Mobile Detection GUI
+local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+-- Fling settings
+local verticalForceMin = 80
+local verticalForceMax = 200
+local flingEnabled = false
+
+-- Global variables
+local mainGui, settingsGui, isPC = nil, nil, false
+
+-- Fling function
+local function flingCharacter()
+    if not flingEnabled then return end
+    local upwardForce = math.random(verticalForceMin, verticalForceMax)
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = Vector3.new(0, upwardForce, 0)
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bv.Parent = hrp
+    game.Debris:AddItem(bv, 0.3)
+end
+
+hrp.Touched:Connect(function(hit)
+    local hitPlayer = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if hitPlayer and hitPlayer ~= player then
+        flingCharacter()
+    end
+end)
+
+-- Toggle function
+local function toggleFling()
+    flingEnabled = not flingEnabled
+    if mainGui and mainGui:FindFirstChild("ToggleButton") then
+        local toggleBtn = mainGui.ToggleButton
+        if flingEnabled then
+            toggleBtn.Text = isPC and "UpFling: ON\n(R:Toggle|T:Settings)" or "UpFling: ON"
+            toggleBtn.BackgroundColor3 = Color3.fromRGB(0,255,0)
+        else
+            toggleBtn.Text = isPC and "UpFling: OFF\n(R:Toggle|T:Settings)" or "UpFling: OFF"
+            toggleBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
+        end
+    end
+end
+
+-- Create PC GUI
+local function createPCGui()
+    mainGui = Instance.new("ScreenGui")
+    mainGui.Name = "FlingPCGui"
+    mainGui.Parent = player:WaitForChild("PlayerGui")
+    
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Name = "ToggleButton"
+    toggleButton.Size = UDim2.new(0, 160, 0, 50)
+    toggleButton.Position = UDim2.new(0, 20, 0, 20)
+    toggleButton.Text = "UpFling: OFF\n(R:Toggle|T:Settings)"
+    toggleButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
+    toggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+    toggleButton.Font = Enum.Font.SourceSansBold
+    toggleButton.TextScaled = true
+    toggleButton.Parent = mainGui
+end
+
+-- Create Mobile GUI
+local function createMobileGui()
+    mainGui = Instance.new("ScreenGui")
+    mainGui.Name = "FlingMobileGui"
+    mainGui.Parent = player:WaitForChild("PlayerGui")
+    
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Name = "ToggleButton"
+    toggleButton.Size = UDim2.new(0, 160, 0, 60)
+    toggleButton.Position = UDim2.new(0, 20, 0, 20)
+    toggleButton.Text = "UpFling: OFF"
+    toggleButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
+    toggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+    toggleButton.Font = Enum.Font.SourceSansBold
+    toggleButton.TextScaled = true
+    toggleButton.Parent = mainGui
+    
+    local settingsButton = Instance.new("TextButton")
+    settingsButton.Size = UDim2.new(0, 160, 0, 60)
+    settingsButton.Position = UDim2.new(0, 20, 0, 90)
+    settingsButton.Text = "⚙️ Settings"
+    settingsButton.BackgroundColor3 = Color3.fromRGB(0,150,255)
+    settingsButton.TextColor3 = Color3.fromRGB(255,255,255)
+    settingsButton.Font = Enum.Font.SourceSansBold
+    settingsButton.TextScaled = true
+    settingsButton.Parent = mainGui
+
+-- Create Settings GUI (shared)
+local function createSettingsGui()
+    settingsGui = Instance.new("ScreenGui")
+    settingsGui.Name = "FlingSettings"
+    settingsGui.Parent = player:WaitForChild("PlayerGui")
+    settingsGui.Enabled = false
+    
+    local settingsFrame = Instance.new("Frame")
+    settingsFrame.Size = UDim2.new(0, 300, 0, 220)
+    settingsFrame.Position = UDim2.new(0.5, -150, 0.5, -110)
+    settingsFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    settingsFrame.BorderSizePixel = 0
+    settingsFrame.Parent = settingsGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = settingsFrame
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Text = "Fling Height Settings"
+    title.BackgroundTransparency = 1
+    title.TextColor3 = Color3.fromRGB(255,255,255)
+    title.Font = Enum.Font.SourceSansBold
+    title.TextScaled = true
+    title.Parent = settingsFrame
+    
+    local minLabel = Instance.new("TextLabel")
+    minLabel.Size = UDim2.new(1, 0, 0, 30)
+    minLabel.Position = UDim2.new(0, 0, 0, 50)
+    minLabel.Text = "Min Force: " .. verticalForceMin
+    minLabel.BackgroundTransparency = 1
+    minLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    minLabel.Font = Enum.Font.SourceSansBold
+    minLabel.TextScaled = true
+    minLabel.Parent = settingsFrame
+    
+    local minSlider = Instance.new("TextBox")
+    minSlider.Size = UDim2.new(1, -20, 0, 35)
+    minSlider.Position = UDim2.new(0, 10, 0, 80)
+    minSlider.Text = tostring(verticalForceMin)
+    minSlider.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    minSlider.TextColor3 = Color3.fromRGB(255,255,255)
+    minSlider.Font = Enum.Font.SourceSans
+    minSlider.TextScaled = true
+    minSlider.Parent = settingsFrame
+    
+    local maxLabel = Instance.new("TextLabel")
+    maxLabel.Size = UDim2.new(1, 0, 0, 30)
+    maxLabel.Position = UDim2.new(0, 0, 0, 120)
+    maxLabel.Text = "Max Force: " .. verticalForceMax
+    maxLabel.BackgroundTransparency = 1
+    maxLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    maxLabel.Font = Enum.Font.SourceSansBold
+    maxLabel.TextScaled = true
+    maxLabel.Parent = settingsFrame
+    
+    local maxSlider = Instance.new("TextBox")
+    maxSlider.Size = UDim2.new(1, -20, 0, 35)
+    maxSlider.Position = UDim2.new(0, 10, 0, 150)
+    maxSlider.Text = tostring(verticalForceMax)
+    maxSlider.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    maxSlider.TextColor3 = Color3.fromRGB(255,255,255)
+    maxSlider.Font = Enum.Font.SourceSans
+    maxSlider.TextScaled = true
+    maxSlider.Parent = settingsFrame
+    
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 120, 0, 40)
+    closeButton.Position = UDim2.new(0.5, -60, 1, -50)
+    closeButton.Text = "CLOSE"
+    closeButton.BackgroundColor3 = Color3.fromRGB(0,150,0)
+    closeButton.TextColor3 = Color3.fromRGB(255,255,255)
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextScaled = true
+    closeButton.Parent = settingsFrame
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 8)
+    closeCorner.Parent = closeButton
+    
+    local function updateLabels()
+        minLabel.Text = "Min Force: " .. verticalForceMin
+        maxLabel.Text = "Max Force: " .. verticalForceMax
+    end
+    
+    minSlider.FocusLost:Connect(function()
+        local num = tonumber(minSlider.Text)
+        if num and num >= 0 and num <= 1000 then
+            verticalForceMin = num
+            updateLabels()
+        else
+            minSlider.Text = tostring(verticalForceMin)
+        end
+    end)
+    
+    maxSlider.FocusLost:Connect(function()
+        local num = tonumber(maxSlider.Text)
+        if num and num >= 0 and num <= 1000 then
+            verticalForceMax = num
+            updateLabels()
+        else
+            maxSlider.Text = tostring(verticalForceMax)
+        end
+    end)
+    
+    closeButton.MouseButton1Click:Connect(function()
+        settingsGui.Enabled = false
+    end)
+end
+
+-- STARTUP GUI (PC or Mobile?)
+local startupGui = Instance.new("ScreenGui")
+startupGui.Name = "StartupSelector"
+startupGui.Parent = player:WaitForChild("PlayerGui")
+
+local startupFrame = Instance.new("Frame")
+startupFrame.Size = UDim2.new(0, 350, 0, 250)
+startupFrame.Position = UDim2.new(0.5, -175, 0.5, -125)
+startupFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+startupFrame.BorderSizePixel = 0
+startupFrame.Parent = startupGui
+
+local startupCorner = Instance.new("UICorner")
+startupCorner.CornerRadius = UDim.new(0, 15)
+startupCorner.Parent = startupFrame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 60)
+title.Text = "🖥️ PC or 📱 Mobile?"
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.SourceSansBold
+title.TextScaled = true
+title.Parent = startupFrame
+
+local pcButton = Instance.new("TextButton")
+pcButton.Size = UDim2.new(0.8, 0, 0, 60)
+pcButton.Position = UDim2.new(0.1, 0, 0, 80)
+pcButton.Text = "🖥️ PC (Keybinds: R/T)"
+pcButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+pcButton.TextColor3 = Color3.fromRGB(255,255,255)
+pcButton.Font = Enum.Font.SourceSansBold
+pcButton.TextScaled = true
+pcButton.Parent = startupFrame
+
+local pcCorner = Instance.new("UICorner")
+pcCorner.CornerRadius = UDim.new(0, 10)
+pcCorner.Parent = pcButton
+
+local mobileButton = Instance.new("TextButton")
+mobileButton.Size = UDim2.new(0.8, 0, 0, 60)
+mobileButton.Position = UDim2.new(0.1, 0, 0, 160)
+mobileButton.Text = "📱 Mobile (Touch buttons)"
+mobileButton.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+mobileButton.TextColor3 = Color3.fromRGB(255,255,255)
+mobileButton.Font = Enum.Font.SourceSansBold
+mobileButton.TextScaled = true
+mobileButton.Parent = startupFrame
+
+local mobileCorner = Instance.new("UICorner")
+mobileCorner.CornerRadius = UDim.new(0, 10)
+mobileCorner.Parent = mobileButton
+
+-- PC Button
+pcButton.MouseButton1Click:Connect(function()
+    startupGui:Destroy()
+    isPC = true
+    createPCGui()
+    createSettingsGui()
+    
+    -- PC Hotkeys
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.R then
+            toggleFling()
+        elseif input.KeyCode == Enum.KeyCode.T then
+            if settingsGui then settingsGui.Enabled = not settingsGui.Enabled end
+        end
+    end)
+end)
+
+-- Mobile Button
+mobileButton.MouseButton1Click:Connect(function()
+    startupGui:Destroy()
+    isPC = false
+    createMobileGui()
+    createSettingsGui()
+end)
