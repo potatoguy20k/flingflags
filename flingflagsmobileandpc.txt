@@ -1,4 +1,4 @@
--- Fling Script with PC/Mobile Detection GUI
+-- Fling Script with PC/Mobile Detection GUI (No Kill Button)
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local character = player.Character or player.CharacterAdded:Wait()
@@ -61,6 +61,8 @@ local function createPCGui()
     toggleButton.Font = Enum.Font.SourceSansBold
     toggleButton.TextScaled = true
     toggleButton.Parent = mainGui
+    
+    toggleButton.MouseButton1Click:Connect(toggleFling)
 end
 
 -- Create Mobile GUI
@@ -89,6 +91,12 @@ local function createMobileGui()
     settingsButton.Font = Enum.Font.SourceSansBold
     settingsButton.TextScaled = true
     settingsButton.Parent = mainGui
+    
+    toggleButton.MouseButton1Click:Connect(toggleFling)
+    settingsButton.MouseButton1Click:Connect(function()
+        if settingsGui then settingsGui.Enabled = not settingsGui.Enabled end
+    end)
+end
 
 -- Create Settings GUI (shared)
 local function createSettingsGui()
