@@ -61,23 +61,6 @@ local function createPCGui()
     toggleButton.Font = Enum.Font.SourceSansBold
     toggleButton.TextScaled = true
     toggleButton.Parent = mainGui
-    
-    local killButton = Instance.new("TextButton")
-    killButton.Size = UDim2.new(0, 160, 0, 50)
-    killButton.Position = UDim2.new(0, 20, 0, 80)
-    killButton.Text = "💀 KILL SCRIPT"
-    killButton.BackgroundColor3 = Color3.fromRGB(150,0,0)
-    killButton.TextColor3 = Color3.fromRGB(255,255,255)
-    killButton.Font = Enum.Font.SourceSansBold
-    killButton.TextScaled = true
-    killButton.Parent = mainGui
-    
-    toggleButton.MouseButton1Click:Connect(toggleFling)
-    killButton.MouseButton1Click:Connect(function()
-        if mainGui then mainGui:Destroy() end
-        if settingsGui then settingsGui:Destroy() end
-        print("🛑 Script killed!")
-    end)
 end
 
 -- Create Mobile GUI
@@ -106,27 +89,6 @@ local function createMobileGui()
     settingsButton.Font = Enum.Font.SourceSansBold
     settingsButton.TextScaled = true
     settingsButton.Parent = mainGui
-    
-    local killButton = Instance.new("TextButton")
-    killButton.Size = UDim2.new(0, 160, 0, 60)
-    killButton.Position = UDim2.new(0, 20, 0, 160)
-    killButton.Text = "💀 KILL SCRIPT"
-    killButton.BackgroundColor3 = Color3.fromRGB(150,0,0)
-    killButton.TextColor3 = Color3.fromRGB(255,255,255)
-    killButton.Font = Enum.Font.SourceSansBold
-    killButton.TextScaled = true
-    killButton.Parent = mainGui
-    
-    toggleButton.MouseButton1Click:Connect(toggleFling)
-    settingsButton.MouseButton1Click:Connect(function()
-        if settingsGui then settingsGui.Enabled = not settingsGui.Enabled end
-    end)
-    killButton.MouseButton1Click:Connect(function()
-        if mainGui then mainGui:Destroy() end
-        if settingsGui then settingsGui:Destroy() end
-        print("🛑 Script killed!")
-    end)
-end
 
 -- Create Settings GUI (shared)
 local function createSettingsGui()
