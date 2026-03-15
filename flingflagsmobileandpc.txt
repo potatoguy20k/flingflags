@@ -1,4 +1,4 @@
--- Fling Script with PC/Mobile Detection GUI (No Kill Button)
+-- Fling Script with PC/Mobile Detection GUI (Fixed Close Button Position)
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local character = player.Character or player.CharacterAdded:Wait()
@@ -98,7 +98,7 @@ local function createMobileGui()
     end)
 end
 
--- Create Settings GUI (shared)
+-- Create Settings GUI (shared) - FIXED CLOSE BUTTON POSITION
 local function createSettingsGui()
     settingsGui = Instance.new("ScreenGui")
     settingsGui.Name = "FlingSettings"
@@ -106,8 +106,8 @@ local function createSettingsGui()
     settingsGui.Enabled = false
     
     local settingsFrame = Instance.new("Frame")
-    settingsFrame.Size = UDim2.new(0, 300, 0, 220)
-    settingsFrame.Position = UDim2.new(0.5, -150, 0.5, -110)
+    settingsFrame.Size = UDim2.new(0, 300, 0, 260)  -- Taller frame
+    settingsFrame.Position = UDim2.new(0.5, -150, 0.5, -130)
     settingsFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     settingsFrame.BorderSizePixel = 0
     settingsFrame.Parent = settingsGui
@@ -167,7 +167,7 @@ local function createSettingsGui()
     
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 120, 0, 40)
-    closeButton.Position = UDim2.new(0.5, -60, 1, -50)
+    closeButton.Position = UDim2.new(0.5, -60, 1, -65)  -- MOVED DOWN (was -50)
     closeButton.Text = "CLOSE"
     closeButton.BackgroundColor3 = Color3.fromRGB(0,150,0)
     closeButton.TextColor3 = Color3.fromRGB(255,255,255)
